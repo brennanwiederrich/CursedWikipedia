@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CursedWikipedia</title>
+<link href="https://fonts.googleapis.com/css2?family=Linux+Libertine:ital,wght@0,400;0,600;1,400&family=Linux+Biolinum&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f8f9fa;--white:#fff;--border:#a2a9b1;--border-l:#eaecf0;--text:#202122;--muted:#54595d;--link:#3366cc;--accent:#36c;--warn-bg:#fee7e6;--warn:#d33}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Linux Libertine',Georgia,serif;font-size:14px;background:var(--bg);color:var(--text);line-height:1.6}
+
+/* HEADER */
+#hdr{background:var(--white);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;gap:12px}
+#logo{display:flex;align-items:center;gap:8px;cursor:pointer}
+#logo-text{font-size:20px;color:#000;letter-spacing:-.3px}
+#logo-sub{font-family:'Linux Biolinum',sans-serif;font-size:11px;color:var(--muted);margin-top:-2px}
+#hdr-srch{margin-left:auto;display:flex;gap:6px}
+#hdr-srch input{padding:4px 8px;border:1px solid var(--border);border-radius:2px;font-size:13px;width:220px;font-family:inherit}
+#hdr-srch button{padding:4px 10px;background:var(--bg);border:1px solid var(--border);border-radius:2px;font-size:12px;cursor:pointer;font-family:'Linux Biolinum',sans-serif}
+#hdr-srch button:hover{background:#e0e0e0}
+
+/* TABS */
+#tabs{background:var(--bg);border-bottom:1px solid var(--border);display:flex;padding:0 16px;font-family:'Linux Biolinum',sans-serif;font-size:13px}
+.tab{padding:6px 14px;color:var(--link);cursor:pointer;border:1px solid transparent;border-bottom:none;margin-bottom:-1px}
+.tab.active{background:var(--white);border-color:var(--border);color:var(--text);font-weight:bold}
+
+/* LAYOUT */
+#wrap{max-width:1200px;margin:0 auto;display:flex;min-height:calc(100vh - 100px)}
+#side{width:180px;flex-shrink:0;padding:16px 8px;border-right:1px solid var(--border-l);font-family:'Linux Biolinum',sans-serif;font-size:12px}
+.s-ttl{font-weight:bold;font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;margin-bottom:4px;padding-bottom:2px;border-bottom:1px solid var(--border-l)}
+.s-sec{margin-bottom:16px}
+.s-lnk{display:block;color:var(--link);padding:2px 0;cursor:pointer}
+.s-lnk:hover{text-decoration:underline}
+#main{flex:1;padding:20px 24px;max-width:960px}
+
+/* LANDING */
+#landing{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px}
+#l-logo{font-size:52px;color:#000;margin-bottom:4px}
+#l-sub{font-family:'Linux Biolinum',sans-serif;font-size:14px;color:var(--muted);margin-bottom:32px;font-style:italic}
+.warn{background:var(--warn-bg);border:1px solid var(--warn);border-left:4px solid var(--warn);padding:10px 16px;font-family:'Linux Biolinum',sans-serif;font-size:13px;color:#600;border-radius:2px;margin-bottom:24px;max-width:560px}
+.sbox{display:flex;width:100%;max-width:560px;margin-bottom:12px}
+.sbox input{flex:1;padding:10px 14px;border:1px solid var(--border);border-right:none;border-radius:2px 0 0 2px;font-size:15px;font-family:'Linux Libertine',serif;outline:none}
+.sbox input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(51,102,204,.15)}
+.sbox button{padding:10px 20px;background:var(--accent);color:#fff;border:1px solid #2a55a3;border-radius:0 2px 2px 0;font-size:14px;font-family:'Linux Biolinum',sans-serif;cursor:pointer;white-space:nowrap}
+.sbox button:hover{background:#2a55a3}
+.eg{font-family:'Linux Biolinum',sans-serif;font-size:12px;color:var(--muted)}
+.eg span{color:var(--link);cursor:pointer}.eg span:hover{text-decoration:underline}
+
+/* LOADING */
+#loading{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;font-family:'Linux Biolinum',sans-serif;color:var(--muted)}
+.spinner{width:40px;height:40px;border:3px solid var(--border-l);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#load-msg{font-size:13px;color:var(--muted);font-style:italic}
+
+/* ARTICLE */
+#art{display:none}
+.art-srch{display:flex;max-width:500px;margin-bottom:20px}
+.art-srch input{flex:1;padding:8px 12px;border:1px solid var(--border);border-right:none;border-radius:2px 0 0 2px;font-size:14px;font-family:'Linux Libertine',serif;outline:none}
+.art-srch input:focus{border-color:var(--accent)}
+.art-srch button{padding:8px 16px;background:var(--accent);color:#fff;border:1px solid #2a55a3;border-radius:0 2px 2px 0;font-size:13px;font-family:'Linux Biolinum',sans-serif;cursor:pointer}
+.art-srch button:hover{background:#2a55a3}
+h1.art-ttl{font-family:'Linux Libertine',serif;font-size:28px;font-weight:normal;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:16px}
+.art-meta{font-family:'Linux Biolinum',sans-serif;font-size:12px;color:var(--muted);margin-bottom:16px;display:flex;gap:16px;flex-wrap:wrap}
+.badge{background:#eaf0fb;border:1px solid #c8d5f0;border-radius:2px;padding:1px 6px;color:var(--accent);font-size:11px}
+.hatnote{font-family:'Linux Biolinum',sans-serif;font-size:12px;color:var(--muted);font-style:italic;margin-bottom:12px;padding-left:1.6em;border-left:3px solid var(--border-l)}
+.ibox{float:right;clear:right;margin:0 0 16px 24px;background:#f8f9fa;border:1px solid var(--border);font-size:13px;font-family:'Linux Biolinum',sans-serif;max-width:260px;width:100%}
+.ibox-ttl{background:#cee0f2;text-align:center;font-weight:bold;padding:5px 8px}
+.ibox-img{width:100%;background:#eef2f8;border-bottom:1px solid var(--border);padding:0;overflow:hidden}
+.ibox-img-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:120px;gap:6px;font-size:10px;color:var(--muted)}
+.ibox table{width:100%;border-collapse:collapse}
+.ibox td{padding:3px 8px;vertical-align:top;border-top:1px solid var(--border-l);font-size:12px;line-height:1.4}
+.ibox td:first-child{font-weight:bold;color:var(--muted);white-space:nowrap;width:40%}
+.toc{display:inline-block;background:#f8f9fa;border:1px solid var(--border);padding:10px 16px;font-family:'Linux Biolinum',sans-serif;font-size:13px;margin:0 0 16px 0;min-width:200px;clear:both}
+.toc-ttl{font-weight:bold;font-size:12px;margin-bottom:6px}
+.toc ol{padding-left:20px;margin:0}.toc li{margin:2px 0}
+.toc a{color:var(--link);text-decoration:none;font-size:12px}.toc a:hover{text-decoration:underline}
+.abody p{margin-bottom:12px;line-height:1.7;font-size:14px}
+.abody h2{font-family:'Linux Libertine',serif;font-size:20px;font-weight:normal;border-bottom:1px solid var(--border);padding-bottom:3px;margin:24px 0 12px}
+.abody a{color:var(--link);text-decoration:none}.abody a:hover{text-decoration:underline}
+.reflist{font-size:12px;font-family:'Linux Biolinum',sans-serif;column-count:2;column-gap:24px;margin-top:8px}
+.reflist ol{padding-left:20px;margin:0}.reflist li{margin-bottom:4px;color:var(--muted);break-inside:avoid}
+.ref-h{font-family:'Linux Libertine',serif;font-size:20px;font-weight:normal;border-bottom:1px solid var(--border);padding-bottom:3px;margin:24px 0 12px}
+.cats{background:#f8f9fa;border:1px solid var(--border);padding:6px 12px;font-family:'Linux Biolinum',sans-serif;font-size:12px;margin-top:24px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.cats a{color:var(--link);text-decoration:none}.cats a:hover{text-decoration:underline}
+.cf::after{content:'';display:table;clear:both}
+
+/* WIP / SPECIAL PAGES */
+#wip{display:none}
+#history-pg{display:none}
+.wip-box{background:var(--warn-bg);border:1px solid var(--warn);border-left:4px solid var(--warn);padding:16px 20px;font-family:'Linux Biolinum',sans-serif;font-size:13px;color:#600;border-radius:2px;max-width:560px;margin:40px auto;text-align:center}
+.wip-box h2{font-family:'Linux Libertine',serif;font-size:22px;font-weight:normal;margin-bottom:8px;color:var(--text)}
+.wip-box p{color:var(--muted);margin-top:6px}
+.hist-table{width:100%;border-collapse:collapse;font-family:'Linux Biolinum',sans-serif;font-size:13px;margin-top:12px}
+.hist-table th{text-align:left;padding:6px 10px;border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+.hist-table td{padding:6px 10px;border-bottom:1px solid var(--border-l);vertical-align:top}
+.hist-table tr:hover td{background:#f0f4fc}
+.hist-table .h-title{color:var(--link);cursor:pointer}.hist-table .h-title:hover{text-decoration:underline}
+.hist-table .h-time{color:var(--muted);font-size:11px;white-space:nowrap}
+.hist-empty{color:var(--muted);font-family:'Linux Biolinum',sans-serif;font-size:13px;font-style:italic;padding:20px 0}
+
+
+#ftr{background:var(--bg);border-top:1px solid var(--border);padding:12px 24px;font-family:'Linux Biolinum',sans-serif;font-size:11px;color:var(--muted);text-align:center;margin-top:40px}
+#ftr a{color:inherit}
+
+@media(max-width:600px){#side{display:none}.ibox{float:none;margin:0 0 16px 0;max-width:100%}.reflist{column-count:1}}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <div id="logo" onclick="goHome()">
+    <svg width="50" height="50" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg" style="opacity:.7">
+      <circle cx="25" cy="25" r="24" fill="none" stroke="#aaa" stroke-width="1.5"/>
+      <circle cx="25" cy="25" r="16" fill="none" stroke="#aaa" stroke-width="1"/>
+      <circle cx="25" cy="25" r="8" fill="none" stroke="#aaa" stroke-width="1"/>
+      <line x1="1" y1="25" x2="49" y2="25" stroke="#aaa" stroke-width="1"/>
+      <line x1="25" y1="1" x2="25" y2="49" stroke="#aaa" stroke-width="1"/>
+      <ellipse cx="25" cy="25" rx="12" ry="24" fill="none" stroke="#aaa" stroke-width="1"/>
+      <text x="25" y="30" text-anchor="middle" font-size="13" fill="#666" font-family="serif" font-style="italic">C</text>
+    </svg>
+    <div>
+      <div id="logo-text">CursedWikipedia</div>
+      <div id="logo-sub">The Free Fictional Encyclopedia</div>
+    </div>
+  </div>
+  <div id="hdr-srch">
+    <input id="hdr-in" type="text" placeholder="Search cursed knowledge…" onkeydown="if(event.key==='Enter'&&this.value.trim())generate(this.value.trim())">
+    <button onclick="generate(document.getElementById('hdr-in').value.trim())">Search</button>
+  </div>
+</div>
+
+<div id="tabs">
+  <div class="tab active" onclick="handleTab(this,'article')">Article</div>
+  <div class="tab" onclick="handleTab(this,'talk')">Talk</div>
+  <div class="tab" onclick="handleTab(this,'read')">Read</div>
+  <div class="tab" onclick="handleTab(this,'edit')">Edit</div>
+  <div class="tab" onclick="handleTab(this,'history')">View history</div>
+</div>
+
+<div id="wrap">
+  <div id="side">
+    <div class="s-sec">
+      <div class="s-ttl">Navigation</div>
+      <span class="s-lnk" onclick="goHome()">Main page</span>
+      <span class="s-lnk" onclick="showWip('Contents')">Contents</span>
+      <span class="s-lnk" onclick="showWip('Featured articles')">Featured articles</span>
+      <span class="s-lnk" onclick="showRandom()">Random article</span>
+    </div>
+    <div class="s-sec">
+      <div class="s-ttl">Cursed Categories</div>
+      <span class="s-lnk" onclick="generate('Theoretical Gastronomy')">Theoretical Gastronomy</span>
+      <span class="s-lnk" onclick="generate('Obscure Dimensions')">Obscure Dimensions</span>
+      <span class="s-lnk" onclick="generate('Defunct Civilizations')">Defunct Civilizations</span>
+      <span class="s-lnk" onclick="generate('Speculative Biology')">Speculative Biology</span>
+      <span class="s-lnk" onclick="generate('Memetic Phenomena')">Memetic Phenomena</span>
+    </div>
+  </div>
+
+  <div id="main">
+    <div id="landing">
+      <div id="l-logo">CursedWikipedia</div>
+      <div id="l-sub">The encyclopaedia of things that don't exist — yet.</div>
+      <div class="warn">⚠️ <strong>Reliability notice:</strong> All articles describe entirely fictional subjects. Any resemblance to real concepts is deeply concerning.</div>
+      <div class="sbox">
+        <input id="l-in" type="text" placeholder="Enter any concept, entity, or phenomenon…" onkeydown="if(event.key==='Enter'&&this.value.trim())generate(this.value.trim())">
+        <button onclick="generate(document.getElementById('l-in').value.trim())">Generate Article</button>
+      </div>
+      <div class="eg">Try:
+        <span onclick="generate('Retrograde Cheese')">Retrograde Cheese</span> ·
+        <span onclick="generate('The Bureaucracy of Sleep')">The Bureaucracy of Sleep</span> ·
+        <span onclick="generate('Civic Fungus')">Civic Fungus</span> ·
+        <span onclick="generate('Inverse Nostalgia')">Inverse Nostalgia</span>
+      </div>
+    </div>
+
+    <div id="loading">
+      <div class="spinner"></div>
+      <div id="load-msg">Querying the Cursed Archive…</div>
+    </div>
+
+    <div id="art">
+      <div class="art-srch">
+        <input id="art-in" type="text" placeholder="Search for another cursed article…" onkeydown="if(event.key==='Enter'&&this.value.trim())generate(this.value.trim())">
+        <button onclick="generate(document.getElementById('art-in').value.trim())">Generate</button>
+      </div>
+      <div id="art-body"></div>
+    </div>
+
+    <div id="wip">
+      <div class="wip-box">
+        <h2>🚧 Work in Progress</h2>
+        <strong id="wip-name"></strong>
+        <p>This page is under construction by our volunteer editors.<br>Check back never.</p>
+      </div>
+    </div>
+
+    <div id="history-pg">
+      <h1 class="art-ttl" id="hist-title">Revision history</h1>
+      <div class="art-meta"><span id="hist-subtitle" style="color:var(--muted)"></span></div>
+      <div id="hist-body"></div>
+    </div>
+  </div>
+</div>
+
+<div id="ftr">
+  CursedWikipedia® is not responsible for ontological crises, existential dread, or spontaneous belief in fictional entities. ·
+  <a href="#">Privacy policy</a> · <a href="#">About CursedWikipedia</a> · <a href="#">Disclaimers</a>
+</div>
+
+<script>
+const MSGS = [
+  'Querying the Cursed Archive…',
+  'Cross-referencing fictional citations…',
+  'Disambiguating dubious concepts…',
+  'Rendering article…'
+];
+
+const PROMPT = c => `You are the editor of CursedWikipedia, a Wikipedia-style encyclopedia for things that don't exist. Write a fake-but-believable article for: "${c}"
+
+Return ONLY valid JSON (no markdown, no backticks):
+{
+  "title": "full article title",
+  "tagline": "one-sentence encyclopedic description",
+  "infobox": {
+    "type": "e.g. Phenomenon / Entity / Event / Substance",
+    "image_caption": "what a photo would show",
+    "fields": [{"label":"..","value":".."},{"label":"..","value":".."},{"label":"..","value":".."},{"label":"..","value":".."},{"label":"..","value":".."}]
+  },
+  "sections": [
+    {"heading":null,"content":"Opening paragraph (2-3 sentences, encyclopedic, with 3-5 [[wikilink]] references to related fictional concepts)"},
+    {"heading":"Background","content":"Two paragraphs. Use [[wikilinks]]."},
+    {"heading":"Characteristics","content":"Two paragraphs. Specific and strange."},
+    {"heading":"History","content":"Two paragraphs with invented dates and researchers."},
+    {"heading":"Cultural significance","content":"One or two paragraphs."},
+    {"heading":"Controversy","content":"One paragraph of academic debate."}
+  ],
+  "references":["A (2003). Title. Journal.","B (2011). Title. Journal.","C (1997). Title. Journal.","D (2018). Title. Journal.","E (2005). Title. Journal.","F (2014). Title. Journal."],
+  "categories":["Cat 1","Cat 2","Cat 3","Cat 4"]
+}
+Rules: dry encyclopedic tone; [[wikilinks]] must be fictional but plausible; humor from tone vs absurdity, never overtly silly.`;
+
+const ALL_PAGES = ['landing','loading','art','wip','history-pg'];
+const history = []; // {title, concept, time}
+
+const RANDOM_CONCEPTS = [
+  'The Inverse Museum','Bureaucratic Fog','Chronological Cheese',
+  'Sleep Legislature','Ambient Regret','Tectonic Bureaucracy',
+  'The Last Tuesday Phenomenon','Resonant Furniture Syndrome',
+  'Civic Mycology','Thermal Nostalgia','Perpendicular Time',
+  'The Ministry of Echoes','Recursive Politeness','Fossilized Opinions'
+];
+
+function showPage(id) {
+  ALL_PAGES.forEach(x => {
+    const el = document.getElementById(x);
+    if (!el) return;
+    el.style.display = x === id ? (x === 'loading' ? 'flex' : 'block') : 'none';
+  });
+}
+
+function setActiveTab(name) {
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.textContent.trim().toLowerCase().replace(' ','') === name.replace(' ',''));
+  });
+}
+
+function handleTab(el, page) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  if (page === 'history') {
+    showHistoryPage();
+  } else if (page === 'article') {
+    // return to whatever was last showing before tabs were touched
+    const cur = ALL_PAGES.find(p => {
+      const el = document.getElementById(p);
+      return el && el.style.display !== 'none';
+    });
+    if (!cur || cur === 'wip' || cur === 'history-pg') showPage('landing');
+  } else {
+    showWip(el.textContent.trim());
+  }
+}
+
+function goHome() {
+  showPage('landing');
+  setActiveTab('article');
+  document.getElementById('l-in').value = '';
+  document.getElementById('hdr-in').value = '';
+}
+
+function showWip(name) {
+  document.getElementById('wip-name').textContent = name;
+  showPage('wip');
+}
+
+function showRandom() {
+  const concept = RANDOM_CONCEPTS[Math.floor(Math.random() * RANDOM_CONCEPTS.length)];
+  generate(concept);
+}
+
+function showHistoryPage() {
+  const subtitle = document.getElementById('hist-subtitle');
+  const body = document.getElementById('hist-body');
+  const histTitle = document.getElementById('hist-title');
+
+  histTitle.textContent = 'History';
+
+  if (history.length === 0) {
+    subtitle.textContent = '';
+    body.innerHTML = '<p class="hist-empty">No articles have been generated this session.</p>';
+  } else {
+    subtitle.textContent = `${history.length} article${history.length !== 1 ? 's' : ''} generated this session`;
+    body.innerHTML = `
+      <table class="hist-table">
+        <thead><tr>
+          <th>Time</th><th>Article</th><th>Concept entered</th><th>Size</th>
+        </tr></thead>
+        <tbody>
+          ${history.slice().reverse().map((h,i) => `
+            <tr>
+              <td class="h-time">${h.time}</td>
+              <td><span class="h-title" onclick="generate('${h.concept.replace(/'/g,"\\'")}')">↺ ${h.title}</span></td>
+              <td style="color:var(--muted)">${h.concept}</td>
+              <td style="color:var(--muted)">${h.size} bytes</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      <p style="font-family:'Linux Biolinum',sans-serif;font-size:11px;color:var(--muted);margin-top:12px">
+        Click an article title to regenerate it. History is cleared on page reload.
+      </p>`;
+  }
+  showPage('history-pg');
+}
+
+function wikilink(text) {
+  return text.replace(/\[\[([^\]]+)\]\]/g, (_,t) =>
+    `<a href="#" onclick="generate('${t.replace(/'/g,"\\'")}');return false">${t}</a>`
+  );
+}
+
+async function fetchImage(caption) {
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:64,
+        messages:[{role:'user',content:`Generate an image: ${caption}. Style: encyclopedic illustration, muted colors, slightly surreal.`}],
+        tools:[{type:'computer_use_20250124',name:'computer',display_width_px:280,display_height_px:180}]
+      })
+    });
+    // image gen not available via this path — use fal instead
+  } catch(e) {}
+  return null;
+}
+
+function render(a) {
+  const secs = a.sections || [];
+  const named = secs.filter(s => s.heading);
+  const toc = named.map((s,i) => `<li><a href="#s${i}">${s.heading}</a></li>`).join('');
+  const rows = (a.infobox?.fields||[]).map(f=>`<tr><td>${f.label}</td><td>${f.value}</td></tr>`).join('');
+
+  let si = 0;
+  const body = secs.map(s => {
+    const h = s.heading ? `<h2 id="s${si++}">${s.heading}</h2>` : '';
+    return h + (s.content||'').split('\n').filter(Boolean).map(p=>`<p>${wikilink(p)}</p>`).join('');
+  }).join('');
+
+  const refs = (a.references||[]).map(r=>`<li>${r}</li>`).join('');
+  const cats = (a.categories||[]).map(c=>
+    `<a href="#" onclick="generate('${c.replace(/'/g,"\\'")}');return false">${c}</a>`
+  ).join(' · ');
+
+  const caption = a.infobox?.image_caption || '';
+
+  document.getElementById('art-body').innerHTML = `
+    <h1 class="art-ttl">${a.title}</h1>
+    <div class="art-meta">
+      <span>${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}</span>
+      <span class="badge">Unverified</span><span class="badge">Cursed</span><span class="badge">Fictional</span>
+    </div>
+    <div class="hatnote">This article is about a fictional concept. For other uses, see <a href="#">${a.title} (disambiguation)</a>.</div>
+    <div class="toc"><div class="toc-ttl">Contents</div><ol>${toc}</ol></div>
+    <div class="cf">
+      <table class="ibox">
+        <tr><td colspan="2" class="ibox-ttl">${a.infobox?.type||'Entry'}</td></tr>
+        <tr><td colspan="2" class="ibox-img" id="ibox-img-cell">
+          <div class="ibox-img-loading">
+            <div class="spinner" style="width:24px;height:24px;border-width:2px"></div>
+            <span style="font-size:10px;margin-top:4px">Generating image…</span>
+          </div>
+        </td></tr>
+        ${rows}
+      </table>
+      <div class="abody"><p><i>${a.tagline}</i></p>${body}</div>
+    </div>
+    <h2 class="ref-h">References</h2>
+    <div class="reflist"><ol>${refs}</ol></div>
+    <div class="cats"><strong>Categories:</strong> ${cats}</div>`;
+
+  showPage('art');
+  setActiveTab('article');
+  document.getElementById('art-in').value = '';
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  // Track in history
+  history.push({
+    title: a.title,
+    concept: document.getElementById('hdr-in').value,
+    time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),
+    size: JSON.stringify(a).length
+  });
+
+  // Generate image async and slot it in when ready
+  generateImage(caption, a.title);
+}
+
+async function generateImage(caption, title) {
+  const cell = document.getElementById('ibox-img-cell');
+  if (!cell) return;
+  try {
+    const prompt = `Wikipedia-style encyclopedic illustration of: ${caption}. Subject: "${title}". Muted desaturated colors, slightly surreal, neutral background, no text.`;
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:16,
+        messages:[
+          {role:'user', content: prompt},
+          {role:'assistant', content:'[Generating image via tool...]'}
+        ]
+      })
+    });
+    // Anthropic messages API doesn't serve image generation directly.
+    // Fall back to a deterministic SVG illustration based on the caption.
+    throw new Error('fallback');
+  } catch(e) {
+    // Render a unique SVG illustration using the caption as a seed
+    cell.innerHTML = buildSVG(caption, title);
+  }
+}
+
+function buildSVG(caption, title) {
+  // Deterministic pseudo-random from string
+  let h = 0;
+  for (let i = 0; i < (caption+title).length; i++) h = Math.imul(31, h) + (caption+title).charCodeAt(i) | 0;
+  const rng = (n) => { h = Math.imul(1664525, h) + 1013904223 | 0; return Math.abs(h) % n; };
+
+  const palettes = [
+    ['#c9d8ee','#8fafd4','#4a7fb5','#2c5282','#e8f0f8'],
+    ['#d4c9ee','#a98fd4','#7a4ab5','#4a2882','#f0e8f8'],
+    ['#c9eed4','#8fd4a9','#4ab57a','#2c8247','#e8f8ec'],
+    ['#eed4c9','#d4a08f','#b5704a','#824a2c','#f8ece8'],
+    ['#eeeec9','#d4d48f','#b5b54a','#82822c','#f8f8e8'],
+  ];
+  const pal = palettes[rng(palettes.length)];
+  const shapes = [];
+
+  // Background
+  shapes.push(`<rect width="280" height="160" fill="${pal[4]}"/>`);
+
+  // Random background shapes
+  for (let i = 0; i < 3; i++) {
+    const x = rng(280), y = rng(160), r = 20 + rng(60);
+    shapes.push(`<circle cx="${x}" cy="${y}" r="${r}" fill="${pal[rng(3)]}" opacity="0.3"/>`);
+  }
+
+  // Main subject shape (varied by seed)
+  const type = rng(5);
+  const cx = 100 + rng(80), cy = 60 + rng(40);
+  if (type === 0) {
+    shapes.push(`<ellipse cx="${cx}" cy="${cy}" rx="${30+rng(25)}" ry="${20+rng(20)}" fill="${pal[2]}" opacity="0.85"/>`);
+    shapes.push(`<ellipse cx="${cx}" cy="${cy}" rx="${15+rng(12)}" ry="${10+rng(10)}" fill="${pal[3]}" opacity="0.7"/>`);
+  } else if (type === 1) {
+    const s = 25+rng(25);
+    shapes.push(`<rect x="${cx-s}" y="${cy-s}" width="${s*2}" height="${s*2}" fill="${pal[2]}" opacity="0.85" transform="rotate(${rng(45)},${cx},${cy})"/>`);
+    shapes.push(`<rect x="${cx-s/2}" y="${cy-s/2}" width="${s}" height="${s}" fill="${pal[3]}" opacity="0.6" transform="rotate(${rng(30)},${cx},${cy})"/>`);
+  } else if (type === 2) {
+    const pts = Array.from({length:5+rng(3)},(_,i)=>{
+      const a=(i/( 5+rng(3)))*Math.PI*2, r=25+rng(20);
+      return `${cx+Math.cos(a)*r},${cy+Math.sin(a)*r}`;
+    }).join(' ');
+    shapes.push(`<polygon points="${pts}" fill="${pal[2]}" opacity="0.85"/>`);
+  } else if (type === 3) {
+    shapes.push(`<line x1="${cx-30}" y1="${cy+20}" x2="${cx}" y2="${cy-30}" stroke="${pal[2]}" stroke-width="6" stroke-linecap="round"/>`);
+    shapes.push(`<line x1="${cx}" y1="${cy-30}" x2="${cx+30}" y2="${cy+20}" stroke="${pal[2]}" stroke-width="6" stroke-linecap="round"/>`);
+    shapes.push(`<line x1="${cx-30}" y1="${cy+20}" x2="${cx+30}" y2="${cy+20}" stroke="${pal[3]}" stroke-width="4" stroke-linecap="round"/>`);
+  } else {
+    for (let i = 0; i < 4+rng(4); i++) {
+      const x = cx-30+rng(60), y = cy-20+rng(40), r = 4+rng(10);
+      shapes.push(`<circle cx="${x}" cy="${y}" r="${r}" fill="${pal[rng(3)]}" opacity="${0.5+rng(5)*0.1}"/>`);
+    }
+  }
+
+  // Caption text at bottom
+  const words = caption.split(' ').slice(0,6).join(' ');
+  shapes.push(`<rect x="0" y="138" width="280" height="22" fill="rgba(0,0,0,0.35)"/>`);
+  shapes.push(`<text x="140" y="153" text-anchor="middle" font-family="Georgia,serif" font-size="10" fill="#fff" font-style="italic">${words}</text>`);
+
+  return `<svg viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">${shapes.join('')}</svg>`;
+}
+
+async function generate(concept) {
+  if (!concept) return;
+  document.getElementById('hdr-in').value = concept;
+  showPage('loading');
+  setActiveTab('article');
+
+  let mi = 0;
+  document.getElementById('load-msg').textContent = MSGS[0];
+  const ticker = setInterval(() => {
+    if (mi < MSGS.length - 1) document.getElementById('load-msg').textContent = MSGS[++mi];
+  }, 900);
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:4096,
+        messages:[{role:'user',content:PROMPT(concept)}]
+      })
+    });
+    clearInterval(ticker);
+    const data = await res.json();
+    if (data.error) throw new Error('API: ' + data.error.message);
+    const raw = (data.content||[]).map(b=>b.text||'').join('');
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('No JSON found. Got: ' + raw.slice(0,120));
+    render(JSON.parse(match[0]));
+  } catch(e) {
+    clearInterval(ticker);
+    showPage('art');
+    document.getElementById('art-body').innerHTML =
+      `<p style="color:var(--warn);font-family:sans-serif;padding:16px 0">⚠️ ${e.message}</p>`;
+    console.error(e);
+  }
+}
+</script>
+</body>
+</html>
